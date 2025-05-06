@@ -10,15 +10,24 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<String> tehtavat = []; // Tehtävälista, lista on tyhjä aluksi kunnes sinne lisätään tehtäviä
 
+  // Funktio tehtävän lisäämiseen
   void _addTask(String uusiTehtava) {
     setState(() {
       tehtavat.add(uusiTehtava); // Lisää tehtävän ja päivittää näkymän
     });
   }
 
+  // Funktio tehtävän poistamiseen
   void _removeTask(int index) {
     setState(() {
       tehtavat.removeAt(index); // Poistaa valitun tehtävän ja päivittää näkymän
+    });
+  }
+
+  // Funktio tehtävän muokkaamiseen
+  void _editTask(int index, String uusiTeksti) {
+    setState(() {
+      tehtavat[index] = uusiTeksti; // Päivittää muokatun tehtävän listassa
     });
   }
 
@@ -30,33 +39,62 @@ class _HomeScreenState extends State<HomeScreen> {
       // Näytä tehtävälista tai ilmoitus, jos lista on tyhjä
       body: tehtavat.isEmpty
           ? Center(child: Text("Ei tehtäviä, lisää uusi tehtävä!"))
-          // Näytä tehtävälista, jos tehtäviä on
           : ListView.builder(
               itemCount: tehtavat.length,
               itemBuilder: (context, index) => ListTile(
                 title: Text(tehtavat[index]),
 
                 // Poistoikoni, joka poistaa tehtävän
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _removeTask(index),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min, // Varmistaa, että ikoni ei vie liikaa tilaa
+                  children: [
+                    // Muokkausikoni
+                    IconButton(
+                      icon: Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () async {
+                        final muokattu = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AddTaskScreen(
+                              alkuperainenTehtava: tehtavat[index], // Siirrä alkuperäinen tehtävä muokkausruutuun
+                            ),
+                          ),
+                        );
+                        if (muokattu != null &&
+                            muokattu is String &&
+                            muokattu.trim().isNotEmpty) {
+                          _editTask(index, muokattu.trim()); // Päivitä tehtävä listassa
+                        }
+                      },
+                    ),
+                    // Poistoikoni
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _removeTask(index),
+                    ),
+                  ],
                 ),
               ),
             ),
 
       // Lisää tehtävä -painike, joka avaa AddTaskScreen ruudun
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () async {
-          final tulos = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddTaskScreen()),
-          );
-
-          if (tulos != null && tulos is String && tulos.trim().isNotEmpty) {
-            _addTask(tulos.trim());
-          }
-        },
+      floatingActionButton: SizedBox(
+        width: 180, // Muokattu leveämmäksi
+        child: FloatingActionButton.extended(
+          icon: Icon(Icons.add),
+          label: Text('Lisää tehtävä'), // Teksti napissa
+          onPressed: () async {
+            final tulos = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddTaskScreen()),
+            );
+            if (tulos != null &&
+                tulos is String &&
+                tulos.trim().isNotEmpty) {
+              _addTask(tulos.trim()); // Lisää uusi tehtävä listalle
+            }
+          },
+        ),
       ),
     );
   }

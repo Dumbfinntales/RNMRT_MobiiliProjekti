@@ -1,40 +1,37 @@
 import 'package:flutter/material.dart';
 
-// AddTaskScreen on erillinen ruutu, jossa voi syöttää tehtäviä, lisätä ne listaan tai liikkua taaksepäin
 class AddTaskScreen extends StatelessWidget {
-  final TextEditingController _controller = TextEditingController();
+  final String? alkuperainenTehtava; // Valinnainen alkuperäinen tehtävä, jos muokataan
+
+  AddTaskScreen({this.alkuperainenTehtava}); // Alkuperäinen tehtävä voidaan siirtää tähän
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Lisää tehtävä')),
+    final TextEditingController _controller =
+        TextEditingController(text: alkuperainenTehtava ?? ''); // Jos alkuperäinen tehtävä on olemassa, täytä kenttä
 
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää'), // Näytetään teksti sen mukaan, onko kyseessä lisäys vai muokkaus
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              controller: _controller,
+              controller: _controller, // Käytetään kontrolleria tekstin syöttämiseen
+              autofocus: true,
               decoration: InputDecoration(
-                labelText: 'Tehtävän nimi',
+                labelText: 'Tehtävä', // Kentän selite
                 border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 20),
-
-            // Tallenna nappi
-            ElevatedButton.icon(
-              icon: Icon(Icons.check),
-              label: Text('Tallenna tehtävä'),
+            ElevatedButton(
+              child: Text('Tallenna'),
               onPressed: () {
-                final newTask = _controller.text;
-                Navigator.pop(context, newTask); // Palauttaa uuden tehtävän kotiruudulle
-                // Jos käyttäjä ei syötä mitään, ei tehdä mitään
+                Navigator.pop(context, _controller.text); // Sulkee ruudun ja lähettää syötetyn tekstin takaisin
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                minimumSize: Size.fromHeight(50),
-              ),
             ),
           ],
         ),
