@@ -1,0 +1,17 @@
+import 'package:flutter/material.dart';
+import 'ruudut/home_screen.dart'; // Importataan kotiruutu
+
+// Main.dartin tarkoitus on vain käynnistää sovellus ja näyttää kotiruutu
+void main() => runApp(ToDoApp()); // Suorittaa sovelluksen
+
+// Rakentaa pääsovelluksen ja näyttää home screenin
+class ToDoApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'RNMRT ToDo App', // Sovelluksen nimi
+      theme: ThemeData(primarySwatch: Colors.teal), // Väri teemaan, näitä voi alkaa muokkaamaan tarkemmin myöhemmin
+      home: HomeScreen(), // Kotiruutu
+    );
+  }
+}
