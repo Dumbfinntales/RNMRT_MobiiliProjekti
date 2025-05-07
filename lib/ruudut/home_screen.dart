@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'add_task_screen.dart'; // Importataan AddTaskScreen, jotta sitä voi käyttää
 
-// HomeScreen on sovelluksen päänäkymä, jossa käyttäjä voi lisätä ja poistaa tehtäviä
 class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> tehtavat = []; // Tehtävälista, lista on tyhjä aluksi kunnes sinne lisätään tehtäviä
+  List<Map<String, dynamic>> tehtavat = []; // Määritetään tehtävät listaksi, joka sisältää sekä tehtävän tekstin että päivämäärän
 
   // Funktio tehtävän lisäämiseen
-  void _addTask(String uusiTehtava) {
+  void _addTask(String uusiTehtava, DateTime paivamaara) {
     setState(() {
-      tehtavat.add(uusiTehtava); // Lisää tehtävän ja päivittää näkymän
+      tehtavat.add({
+        'tehtava': uusiTehtava,
+        'paivamaara': paivamaara,
+      });
+      // Järjestetään tehtävät aikajärjestykseen 
+      tehtavat.sort((a, b) => a['paivamaara'].compareTo(b['paivamaara']));
     });
   }
 
@@ -25,9 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Funktio tehtävän muokkaamiseen
-  void _editTask(int index, String uusiTeksti) {
+  void _editTask(int index, String uusiTehtava, DateTime paivamaara) {
     setState(() {
-      tehtavat[index] = uusiTeksti; // Päivittää muokatun tehtävän listassa
+      tehtavat[index] = {
+        'tehtava': uusiTehtava,
+        'paivamaara': paivamaara,
+      };
+      tehtavat.sort((a, b) => a['paivamaara'].compareTo(b['paivamaara']));
     });
   }
 
@@ -41,60 +49,69 @@ class _HomeScreenState extends State<HomeScreen> {
           ? Center(child: Text("Ei tehtäviä, lisää uusi tehtävä!"))
           : ListView.builder(
               itemCount: tehtavat.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(tehtavat[index]),
+              itemBuilder: (context, index) {
+                final tehtava = tehtavat[index];
+                final paiva = tehtava['paivamaara'] as DateTime;
 
-                // Poistoikoni, joka poistaa tehtävän
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min, // Varmistaa, että ikoni ei vie liikaa tilaa
-                  children: [
-                    // Muokkausikoni
-                    IconButton(
-                      icon: Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () async {
-                        final muokattu = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AddTaskScreen(
-                              alkuperainenTehtava: tehtavat[index], // Siirrä alkuperäinen tehtävä muokkausruutuun
+                return ListTile(
+                  // Päivämäärä
+                  title: Text('${paiva.day}.${paiva.month}.${paiva.year}',
+                  style: TextStyle(fontSize: 14)
+                  ), 
+                  // Tehtävä
+                  subtitle: Text(tehtava['tehtava'],
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                  ), 
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min, // Varmistaa, että ikoni ei vie liikaa tilaa
+                    children: [
+                      // Muokkausikoni
+                      IconButton(
+                        icon: Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () async {
+                          final muokattu = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddTaskScreen(
+                                alkuperainenTehtava: tehtava['tehtava'],
+                                alkuperainenPaivamaara: paiva,
+                              ),
                             ),
-                          ),
-                        );
-                        if (muokattu != null &&
-                            muokattu is String &&
-                            muokattu.trim().isNotEmpty) {
-                          _editTask(index, muokattu.trim()); // Päivitä tehtävä listassa
-                        }
-                      },
-                    ),
-                    // Poistoikoni
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _removeTask(index),
-                    ),
-                  ],
-                ),
-              ),
+                          );
+                          if (muokattu != null &&
+                              muokattu is Map &&
+                              muokattu['tehtava'] != null &&
+                              muokattu['paivamaara'] != null) {
+                            _editTask(index, muokattu['tehtava'], muokattu['paivamaara']);
+                          }
+                        },
+                      ),
+                      // Poistoikoni
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _removeTask(index),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-
       // Lisää tehtävä -painike, joka avaa AddTaskScreen ruudun
-      floatingActionButton: SizedBox(
-        width: 180, // Muokattu leveämmäksi
-        child: FloatingActionButton.extended(
-          icon: Icon(Icons.add),
-          label: Text('Lisää tehtävä'), // Teksti napissa
-          onPressed: () async {
-            final tulos = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => AddTaskScreen()),
-            );
-            if (tulos != null &&
-                tulos is String &&
-                tulos.trim().isNotEmpty) {
-              _addTask(tulos.trim()); // Lisää uusi tehtävä listalle
-            }
-          },
-        ),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: Icon(Icons.add),
+        label: Text('Lisää tehtävä'),
+        onPressed: () async {
+          final tulos = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddTaskScreen()),
+          );
+          if (tulos != null &&
+              tulos is Map &&
+              tulos['tehtava'] != null &&
+              tulos['paivamaara'] != null) {
+            _addTask(tulos['tehtava'], tulos['paivamaara']);
+          }
+        },
       ),
     );
   }
