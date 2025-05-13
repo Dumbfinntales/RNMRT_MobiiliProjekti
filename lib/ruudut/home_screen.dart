@@ -39,6 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result != null) {
       setState(() {
         _tasks.add(result); // Lisätään uusi tehtävä listaan
+        // Sorteeraa niin et tehdyt tehtävät on pohjalla
+        _tasks.sort((a, b) {
+          if (a['done'] == b['done']) return 0;
+          return a['done'] ? 1 : -1;
+        });
       });
       await _saveTasks(); // Tallennetaan päivitetty tehtävälista
     }
@@ -150,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Card(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: task['done'] ? Colors.green[100] : null, // Tausta muuttuu vihreäksi ku valmis
             child: ListTile(
               onTap: () => _toggleTaskDone(index),
               leading: Container(
