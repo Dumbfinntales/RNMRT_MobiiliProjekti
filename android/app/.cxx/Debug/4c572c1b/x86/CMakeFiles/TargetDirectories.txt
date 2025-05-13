@@ -1,0 +1,2 @@
+D:/UnityProjekteja/RNMRT_MobiiliProjekti/android/app/.cxx/Debug/4c572c1b/x86/CMakeFiles/edit_cache.dir
+D:/UnityProjekteja/RNMRT_MobiiliProjekti/android/app/.cxx/Debug/4c572c1b/x86/CMakeFiles/rebuild_cache.dir

@@ -117,6 +117,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   'tehtava': _controller.text,
                   'paivamaara': _selectedDate,
                   'priority': _selectedPriority,
+                  'done': false,
                 });
               },
             ),

@@ -12,7 +12,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _tasks = []; // Lista tallennetuista tehtävistä
   // Jokainen tehtävä on Map, jossa on avaimet 'tehtava', 'paivamaara' ja 'priority'
-
+  void _toggleTaskDone(int index) async {
+    setState(() {
+      _tasks[index]['done'] = !_tasks[index]['done'];
+      _tasks.sort((a, b) {
+        if (a['done'] == b['done']) return 0;
+        return a['done'] ? 1 : -1; // Done items to bottom
+      });
+    });
+    await _saveTasks(); // Save changes
+  }
   @override
   void initState() {
     super.initState();
@@ -67,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Map<String, dynamic>> loadedTasks = storedTasks.map((jsonStr) {
       final Map<String, dynamic> decoded = Map<String, dynamic>.from(jsonDecode(jsonStr));
       decoded['paivamaara'] = DateTime.parse(decoded['paivamaara']); // Muutetaan merkkijono takaisin DateTime-tyyppiseksi
+      decoded['done'] = decoded['done'] ?? false;
       return decoded;
     }).toList();
 
@@ -141,30 +151,34 @@ class _HomeScreenState extends State<HomeScreen> {
           return Card(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
-              // Väripalkki tehtävän prioriteetin mukaan
+              onTap: () => _toggleTaskDone(index),
               leading: Container(
                 width: 10,
                 height: double.infinity,
                 color: _getPriorityColor(task['priority']),
               ),
-              title: Text(task['tehtava']),
+              title: Text(
+                task['tehtava'],
+                style: TextStyle(
+                  decoration: task['done'] ? TextDecoration.lineThrough : TextDecoration.none,
+                  color: task['done'] ? Colors.grey : Colors.black,
+                ),
+              ),
               subtitle: Text('Päivämäärä: ${_formatDate(task['paivamaara'])}'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Muokkauspainike
                   IconButton(
                     icon: Icon(Icons.edit),
                     onPressed: () => _editTask(index),
                   ),
-                  // Poistopainike
                   IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () => _deleteTask(index),
                   ),
                 ],
               ),
-            ),
+            )
           );
         },
       ),
