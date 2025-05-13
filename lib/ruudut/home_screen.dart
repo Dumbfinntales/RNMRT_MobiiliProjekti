@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_task_screen.dart'; // Tuodaan tehtävänlisäys-/muokkausnäyttö
+import 'package:shared_preferences/shared_preferences.dart'; // Tallennusta varten
+import 'dart:convert'; // JSON data muotoilua varten
 
 // Etusivun StatefulWidget, jossa tehtävälista näkyy
 class HomeScreen extends StatefulWidget {
@@ -9,6 +11,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _tasks = []; // Lista tallennetuista tehtävistä
+  // Jokainen tehtävä on Map, jossa on avaimet 'tehtava', 'paivamaara' ja 'priority'
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks(); // Ladataan tallennetut tehtävät sovelluksen käynnistyessä
+  }
 
   // Avaa tehtävänlisäysnäytön ja lisää uuden tehtävän paluun jälkeen
   Future<void> _navigateAndAddTask() async {
@@ -22,8 +31,50 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _tasks.add(result); // Lisätään uusi tehtävä listaan
       });
+      await _saveTasks(); // Tallennetaan päivitetty tehtävälista
     }
   }
+
+  // Tallentaa tehtävät pysyvästi SharedPreferencesiin
+  Future<void> _saveTasks() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Muutetaan jokainen tehtävä JSON-merkkijonoksi
+    final List<String> taskJsonList = _tasks.map((task) {
+      final taskCopy = Map<String, dynamic>.from(task);
+
+      if (taskCopy['paivamaara'] is DateTime) {
+        taskCopy['paivamaara'] = (taskCopy['paivamaara'] as DateTime).toIso8601String();
+      }
+
+      return jsonEncode(taskCopy); // Muutetaan Map JSON-merkkijonoksi
+    }).toList();
+
+    await prefs.setStringList('tasks', taskJsonList); // Tallennetaan laitteelle
+    print("Tehtävä tallennettu: $taskJsonList"); // Tulostus testausta varten
+  } catch (e) {
+    print("Virhe tallennuksessa: $e");
+  }
+}
+
+  // Tehtävien latuas SharedPreferencesista
+  Future<void> _loadTasks() async {
+  final prefs = await SharedPreferences.getInstance();
+  final List<String>? storedTasks = prefs.getStringList('tasks');
+
+  if (storedTasks != null) {
+    final List<Map<String, dynamic>> loadedTasks = storedTasks.map((jsonStr) {
+      final Map<String, dynamic> decoded = Map<String, dynamic>.from(jsonDecode(jsonStr));
+      decoded['paivamaara'] = DateTime.parse(decoded['paivamaara']); // Muutetaan merkkijono takaisin DateTime-tyyppiseksi
+      return decoded;
+    }).toList();
+
+    setState(() {
+      _tasks = loadedTasks; // Päivitetään tehtävälista ladatuilla tiedoilla
+    });
+  }
+}
 
   // Avaa tehtävänmuokkausnäytön ja päivittää olemassa olevan tehtävän
   Future<void> _editTask(int index) async {
@@ -38,11 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
+  
+
     // Jos käyttäjä teki muutoksia
     if (result != null) {
       setState(() {
         _tasks[index] = result; // Päivitetään tehtävän tiedot
       });
+      await _saveTasks(); // Tallennetaan muutokset
     }
   }
 
@@ -51,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _tasks.removeAt(index); // Poistetaan valittu tehtävä
     });
+    _saveTasks(); // Tallennetaan muutokset
   }
 
   // Määrittää prioriteettiin liittyvän värin
@@ -81,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: ListView.builder(
         itemCount: _tasks.length, // Listan koko
         itemBuilder: (context, index) {
-          final tehtava = _tasks[index];
+          final task = _tasks[index];
 
           return Card(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -90,10 +145,10 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: Container(
                 width: 10,
                 height: double.infinity,
-                color: _getPriorityColor(tehtava['priority']),
+                color: _getPriorityColor(task['priority']),
               ),
-              title: Text(tehtava['tehtava']),
-              subtitle: Text('Päivämäärä: ${_formatDate(tehtava['paivamaara'])}'),
+              title: Text(task['tehtava']),
+              subtitle: Text('Päivämäärä: ${_formatDate(task['paivamaara'])}'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
