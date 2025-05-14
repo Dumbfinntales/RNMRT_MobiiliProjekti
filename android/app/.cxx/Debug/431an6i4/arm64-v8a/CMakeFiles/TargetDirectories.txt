@@ -1,0 +1,2 @@
+C:/riina/hhhhhh/RNMRT_MobiiliProjekti/android/app/.cxx/Debug/431an6i4/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/riina/hhhhhh/RNMRT_MobiiliProjekti/android/app/.cxx/Debug/431an6i4/arm64-v8a/CMakeFiles/rebuild_cache.dir

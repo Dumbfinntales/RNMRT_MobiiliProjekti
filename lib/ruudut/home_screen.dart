@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _tasks = []; // Lista tallennetuista tehtävistä
   String _selectedFilter = 'all'; // Suodatuksen oletusarvo
+  String _searchQuery = ''; // Haku
 
   // Jokainen tehtävä on Map, jossa on avaimet 'tehtava', 'paivamaara' ja 'priority'
   void _toggleTaskDone(int index) async {
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _filteredTasks()[index]['done'] = !_filteredTasks()[index]['done'];
       _sortTasks();
     });
-    await _saveTasks(); // Save changes
+    await _saveTasks(); // Tallennetaan
   }
 
   @override
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (storedTasks != null) {
       final List<Map<String, dynamic>> loadedTasks = storedTasks.map((jsonStr) {
         final Map<String, dynamic> decoded =
-            Map<String, dynamic>.from(jsonDecode(jsonStr));
+        Map<String, dynamic>.from(jsonDecode(jsonStr));
         decoded['paivamaara'] = DateTime.parse(decoded['paivamaara']);
         decoded['done'] = decoded['done'] ?? false;
         return decoded;
@@ -143,12 +144,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
   }
 
-  // Palauttaa suodatetun tehtävälistan valinnan perusteella
+  // HAKU & SUODATUS
+  // Palauttaa suodatetun tehtävälistan suodattimen ja hakusanan perusteella
   List<Map<String, dynamic>> _filteredTasks() {
-    if (_selectedFilter == 'all') return _tasks; // Ei suodatusta
+    return _tasks.where((task) {
+      // Tarkistaa täsmääkö tehtävän prioriteetti suodattimeen, tai jos suodatin on 'all'
+      final matchesFilter =
+          _selectedFilter == 'all' || task['priority'] == _selectedFilter;
 
-    return _tasks.where((task) => task['priority'] == _selectedFilter).toList();
+      // Muutetaan pieniksi kirjaimiksi
+      final tehtavaTeksti =
+      task['tehtava'].toLowerCase(); // Haetaan tehtävän teksti
+      // Muodostetaan numero tekstimuotoon
+      final paivamaaraTeksti =
+      _formatDate(task['paivamaara']).toLowerCase();
+
+      // Tarkistetaan täsmääkö hakusana joko tehtävän tekstissä tai päivämäärässä
+      final matchesSearch = tehtavaTeksti.contains(_searchQuery.toLowerCase()) ||
+          paivamaaraTeksti.contains(_searchQuery.toLowerCase());
+
+      // Palautetaan true vain jos molemmat ehdot täyttyvät: prioriteettisuodatin ja hakusana
+      return matchesFilter && matchesSearch;
+    }).toList(); // Muutetaan tulos listaksi ja palautetaan
   }
+
 
   // Järjestää tehtävät niin että tekemättömät ovat ensin
   void _sortTasks() {
@@ -168,26 +187,43 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // Suodatin Dropdown prioriteetin mukaan
+          // 🔍 Hakukenttä + Suodatusvalikko
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: DropdownButton<String>(
-              value: _selectedFilter,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedFilter = newValue!;
-                });
-              },
-              items: [
-                DropdownMenuItem(value: 'all', child: Text('Kaikki')),
-                DropdownMenuItem(value: 'high', child: Text('Kiireelliset')),
-                DropdownMenuItem(value: 'medium', child: Text('Tärkeät')),
-                DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset')),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+            child: Column(
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Hae tehtävää',
+                    prefixIcon: Icon(Icons.search), // Suurennuslasi
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                ),
+                SizedBox(height: 8),
+                DropdownButton<String>(
+                  value: _selectedFilter,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedFilter = newValue!;
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem(value: 'all', child: Text('Kaikki')),
+                    DropdownMenuItem(value: 'high', child: Text('Kiireelliset')),
+                    DropdownMenuItem(value: 'medium', child: Text('Tärkeät')),
+                    DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset')),
+                  ],
+                ),
               ],
             ),
           ),
 
-          // Tehtävälista
+          // 📋 Tehtävälista
           Expanded(
             child: ListView.builder(
               itemCount: filtered.length,
@@ -212,8 +248,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: task['done'] ? Colors.grey : Colors.black,
                       ),
                     ),
-                    subtitle: Text(
-                        'Päivämäärä: ${_formatDate(task['paivamaara'])}'),
+                    subtitle:
+                    Text('Päivämäärä: ${_formatDate(task['paivamaara'])}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
