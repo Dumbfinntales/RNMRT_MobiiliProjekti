@@ -19,7 +19,8 @@ class AddTaskScreen extends StatefulWidget {
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
   final TextEditingController _controller = TextEditingController(); // Tekstikentän ohjain
-  DateTime? _selectedDate;             // Valittu päivämäärä
+  DateTime? _selectedDate;  // Valittu päivämäärä
+  TimeOfDay? _selectedTime; // Valittu kellonaika
   String _selectedPriority = 'medium'; // Oletusprioriteetti on "medium" (keltainen)
 
   @override
@@ -28,6 +29,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     // Alustetaan tekstikenttä ja muut arvot muokkaustilanteessa
     _controller.text = widget.alkuperainenTehtava ?? '';
     _selectedDate = widget.alkuperainenPaivamaara ?? DateTime.now();
+    _selectedTime = TimeOfDay.fromDateTime(widget.alkuperainenPaivamaara ?? DateTime.now());
     _selectedPriority = widget.alkuperainenPrioriteetti ?? 'medium';
   }
 
@@ -39,40 +41,69 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != _selectedDate) {
+    
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
       });
     }
   }
 
-  // Muotoilee päivämäärän dd-MM-yyyy -muotoon
-  String formatDate(DateTime date) {
-    return DateFormat('dd-MM-yyyy').format(date);
+  // Funktio jolla valitaan aika
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime!,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
+  // Muotoilee päivämäärän dd-MM-yyyy -muotoon ja lisää kellonajan samaan merkkijonoon
+  String formatDate() {
+    final date = _selectedDate!;
+    final time = _selectedTime!;
+    final full = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    return DateFormat('dd-MM-yyyy HH:mm').format(full);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Näytön otsikko riippuen siitä, onko kyseessä lisäys vai muokkaus
         title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Päivämääräkenttä (vain luettava), jossa on kalenteripainike
+            // Päivämäärä + aika (vain luettava)
             TextField(
-              controller: TextEditingController(text: formatDate(_selectedDate!)),
+              controller: TextEditingController(text: formatDate()),
               readOnly: true,
               decoration: InputDecoration(
-                labelText: 'Päivämäärä',
+                labelText: 'Päivämäärä & aika',
                 border: OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () => _selectDate(context),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.calendar_today),
+                      onPressed: () => _selectDate(context),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.access_time),
+                      onPressed: () => _selectTime(context),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -113,9 +144,17 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             ElevatedButton(
               child: Text('Tallenna'),
               onPressed: () {
+                final fullDateTime = DateTime(
+                  _selectedDate!.year,
+                  _selectedDate!.month,
+                  _selectedDate!.day,
+                  _selectedTime!.hour,
+                  _selectedTime!.minute,
+                );
+
                 Navigator.pop(context, {
                   'tehtava': _controller.text,
-                  'paivamaara': _selectedDate,
+                  'paivamaara': fullDateTime,
                   'priority': _selectedPriority,
                   'done': false,
                 });

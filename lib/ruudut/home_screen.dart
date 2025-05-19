@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'add_task_screen.dart'; // Tuodaan tehtävänlisäys-/muokkausnäyttö
 import 'package:shared_preferences/shared_preferences.dart'; // Tallennusta varten
 import 'dart:convert'; // JSON data muotoilua varten
+import 'package:intl/intl.dart'; // Kirjasto päivämäärän muotoiluun
 
 // Etusivun StatefulWidget, jossa tehtävälista näkyy
 class HomeScreen extends StatefulWidget {
@@ -139,9 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Muotoilee päivämäärän dd-MM-yyyy
+  // Muotoilee päivämäärän dd-MM-yyyy ja kellonajan HH:mm -muotoon
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+      final datePart = DateFormat('dd-MM-yyyy').format(date); // Päivämäärä
+      final timePart = DateFormat('HH:mm').format(date); // Aika 24h muodossa
+      return '$datePart \nKlo $timePart'; // Lisää "klo" ja laittaa sen erille riville
   }
 
   // HAKU & SUODATUS
@@ -187,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // 🔍 Hakukenttä + Suodatusvalikko
+          // Hakukenttä + Suodatusvalikko
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
             child: Column(
@@ -223,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // 📋 Tehtävälista
+          // Tehtävälista
           Expanded(
             child: ListView.builder(
               itemCount: filtered.length,
