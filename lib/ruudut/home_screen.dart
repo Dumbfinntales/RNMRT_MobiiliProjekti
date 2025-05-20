@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _formatDate(DateTime date) {
       final datePart = DateFormat('dd.MM.yy').format(date); // Päivämäärä
       final timePart = DateFormat('HH:mm').format(date); // Aika 24h muodossa
-      return '$datePart    Klo $timePart'; // Lisää "klo"
+      return '$datePart \nKlo $timePart'; // Lisää "klo"
   }
 
   // HAKU & SUODATUS
