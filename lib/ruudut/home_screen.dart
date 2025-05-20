@@ -130,11 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case 'high':
-        return Colors.red;
+        return Color(0xFFE6564C);
       case 'medium':
-        return Colors.yellow;
+        return Color(0xFFFEDA7A);
       case 'low':
-        return Colors.green;
+        return Color(0xFFA2E8BE);
       default:
         return Colors.grey;
     }
@@ -142,9 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Muotoilee päivämäärän dd-MM-yyyy ja kellonajan HH:mm -muotoon
   String _formatDate(DateTime date) {
-      final datePart = DateFormat('dd-MM-yyyy').format(date); // Päivämäärä
+      final datePart = DateFormat('dd.MM.yy').format(date); // Päivämäärä
       final timePart = DateFormat('HH:mm').format(date); // Aika 24h muodossa
-      return '$datePart \nKlo $timePart'; // Lisää "klo" ja laittaa sen erille riville
+      return '$datePart    Klo $timePart'; // Lisää "klo"
   }
 
   // HAKU & SUODATUS
@@ -185,21 +185,65 @@ class _HomeScreenState extends State<HomeScreen> {
     final filtered = _filteredTasks();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Tehtävälista'),
-      ),
       body: Column(
         children: [
+          // Otsikko + Switch
+          Padding(
+            padding: const EdgeInsets.only(top: 80, bottom: 8.0, left: 28, right: 28),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'ToDo',
+                  style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
+                ),
+
+                // Switch teemalle, voi vaihtaa napiksikki
+                // Joku juttu lisätä mikä ilmentää mikä tämä on. Kuu ja aurinko?
+                Switch(
+                  value: false,
+                  onChanged: (bool newValue) { },
+                  activeColor: Colors.blue,           // Pallon väri, kun päällä
+                  inactiveThumbColor: Colors.blue,    // Pallon väri, kun pois päältä
+                ),
+              ],
+            ),
+          ),
+
           // Hakukenttä + Suodatusvalikko
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
             child: Column(
               children: [
                 TextField(
+                  style: const TextStyle(fontSize: 24),
                   decoration: InputDecoration(
-                    labelText: 'Hae tehtävää',
-                    prefixIcon: Icon(Icons.search), // Suurennuslasi
-                    border: OutlineInputBorder(),
+                    hintText: 'Hae',
+                    hintStyle: TextStyle(fontSize: 24, color: Colors.grey[600]),
+                    prefixIcon: Icon(Icons.search, size: 30,), // Suurennuslasi
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide(
+                        color: Colors.grey[300]!,
+                        width: 1.0,
+                      ),
+                    ),
+                    // Kun kenttä ei ole aktiivinen
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide(
+                        color: Colors.grey[300]!,
+                        width: 1.2,
+                      ),
+                    ),
+                    // Kun kenttä on aktiivinen
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide(
+                        color: Colors.grey[500]!,
+                        width: 1.4,
+                      ),
+                    ),
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -208,19 +252,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 SizedBox(height: 8),
-                DropdownButton<String>(
-                  value: _selectedFilter,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedFilter = newValue!;
-                    });
-                  },
-                  items: [
-                    DropdownMenuItem(value: 'all', child: Text('Kaikki')),
-                    DropdownMenuItem(value: 'high', child: Text('Kiireelliset')),
-                    DropdownMenuItem(value: 'medium', child: Text('Tärkeät')),
-                    DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset')),
-                  ],
+
+                // Suodatin
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: DropdownButton<String>(
+                    value: _selectedFilter,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedFilter = newValue!;
+                      });
+                    },
+                    items: [
+                      DropdownMenuItem(value: 'all', child: Text('Kaikki', style: TextStyle(fontSize: 20)),
+                      ),
+                      DropdownMenuItem(value: 'high', child: Text('Kiireelliset', style: TextStyle(fontSize: 20)),
+                      ),
+                      DropdownMenuItem(value: 'medium', child: Text('Tärkeät', style: TextStyle(fontSize: 20)),
+                      ),
+                      DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset', style: TextStyle(fontSize: 20)),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -233,35 +286,50 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 final task = filtered[index];
                 return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: task['done'] ? Colors.green[100] : null,
+                  margin: EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                  color: task['done'] ? Color(0xFF73E19F) : Colors.white,
                   child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                     onTap: () => _toggleTaskDone(index),
                     leading: Container(
-                      width: 10,
-                      height: double.infinity,
-                      color: _getPriorityColor(task['priority']),
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(task['priority']),
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     title: Text(
                       task['tehtava'],
                       style: TextStyle(
+                        fontSize: 22,
                         decoration: task['done']
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,
-                        color: task['done'] ? Colors.grey : Colors.black,
+                        decorationThickness: 1,
+                        color: task['done'] ? Color(0xFF696868) : Colors.black,
                       ),
                     ),
-                    subtitle:
-                    Text('Päivämäärä: ${_formatDate(task['paivamaara'])}'),
+                    subtitle: Text(
+                      _formatDate(task['paivamaara']),
+                      style: TextStyle(
+                          fontSize: 18,
+                        decoration: task['done']
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                        decorationThickness: 1,
+                        color: task['done'] ? Color(0xFF696868) : Colors.black,
+                      ),
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: Icon(Icons.edit, size: 30),
                           onPressed: () => _editTask(index),
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete),
+                          icon: Icon(Icons.delete, size: 30),
                           onPressed: () => _deleteTask(index),
                         ),
                       ],
@@ -273,11 +341,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateAndAddTask,
-        child: Icon(Icons.add),
-        tooltip: 'Lisää tehtävä',
+
+      // Uuden tehtävän lisäys
+      floatingActionButton: SizedBox(
+        width: 72,
+        height: 72,
+        child: FloatingActionButton(
+          onPressed: _navigateAndAddTask,
+          backgroundColor: Color(0xFF4395F9),
+          shape: CircleBorder(),
+          child: Icon(Icons.add, size: 36, color: Colors.white),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
