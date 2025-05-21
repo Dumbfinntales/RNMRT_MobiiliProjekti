@@ -89,17 +89,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final date = _selectedDate!;
     final time = _selectedTime!;
     final full = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    return DateFormat('dd-MM-yyyy HH:mm').format(full);
+    return DateFormat('dd.MM.yyyy HH:mm').format(full);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 100,
         title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 16.0),
         child: Column(
           children: [
             // Päivämäärä + aika (vain luettava)
@@ -108,7 +109,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               readOnly: true,
               decoration: InputDecoration(
                 labelText: 'Päivämäärä & aika',
-                border: OutlineInputBorder(),
+                floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30)
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(color: Color(0xFF4395F9), width: 2),
+                ),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -126,29 +134,74 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             ),
             SizedBox(height: 20),
 
-            // Tehtävän tekstikenttä
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: 'Tehtävä',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-
             // Prioriteetin valintavalikko (Dropdown)
             DropdownButtonFormField<String>(
               value: _selectedPriority,
               decoration: InputDecoration(
                 labelText: 'Prioriteetti',
-                border: OutlineInputBorder(),
+                floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30)
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(color: Color(0xFF4395F9), width: 2),
+                ),
               ),
               items: [
-                DropdownMenuItem(value: 'high', child: Text('Kiireellinen (Punainen)')),
-                DropdownMenuItem(value: 'medium', child: Text('Tärkeä (Keltainen)')),
-                DropdownMenuItem(value: 'low', child: Text('Ei kiireellinen (Vihreä)')),
+                DropdownMenuItem(
+                  value: 'high',
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE6564C),
+                          shape: BoxShape.circle, // Pallo
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text('Kiireellinen'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'medium',
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFFEDA7A),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text('Tärkeä'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'low',
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFA2E8BE),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text('Ei kiireellinen'),
+                    ],
+                  ),
+                ),
               ],
+
               onChanged: (value) {
                 setState(() {
                   _selectedPriority = value!; // Päivitetään valittu prioriteetti
@@ -157,8 +210,31 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             ),
             SizedBox(height: 20),
 
+            // Tehtävän tekstikenttä
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: 'Tehtävä',
+                floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30)
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(color: Color(0xFF4395F9), width: 2),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+
             // Tallenna-painike, joka palauttaa annetut tiedot takaisin edelliselle näytölle
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF4395F9),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
               child: Text('Tallenna'),
               onPressed: () {
                 final fullDateTime = DateTime(
