@@ -6,11 +6,13 @@ class AddTaskScreen extends StatefulWidget {
   final String? alkuperainenTehtava;       // Mahdollinen aiempi tehtäväteksti muokkauksessa
   final DateTime? alkuperainenPaivamaara;  // Mahdollinen aiempi päivämäärä muokkauksessa
   final String? alkuperainenPrioriteetti;  // Mahdollinen aiempi prioriteetti muokkauksessa
+  final bool darkMode; // Seuraa darkModen muutosta homeScreenistä
 
   AddTaskScreen({
     this.alkuperainenTehtava,
     this.alkuperainenPaivamaara,
     this.alkuperainenPrioriteetti,
+    required this.darkMode,
   });
 
   @override
@@ -83,7 +85,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     }
   }
 
-
   // Muotoilee päivämäärän dd-MM-yyyy -muotoon ja lisää kellonajan samaan merkkijonoon
   String formatDate() {
     final date = _selectedDate!;
@@ -95,9 +96,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Taustaväri muuttuu riippuen moodista
+      backgroundColor: widget.darkMode ? Color.fromARGB(200, 0, 0, 0) : Colors.white,
       appBar: AppBar(
         toolbarHeight: 100,
-        title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää'),
+        backgroundColor: widget.darkMode ? Color.fromARGB(20, 0, 0, 0) : Colors.white,
+        title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää', 
+          style: TextStyle( // Muuttaa otiskon värin riippuen moodista
+            color: widget.darkMode ? Colors.white : Colors.black
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 16.0),
@@ -107,11 +115,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             TextField(
               controller: TextEditingController(text: formatDate()),
               readOnly: true,
+              // Tekstikentän väri muuttuu riippuen moodista
+              style: TextStyle(
+                color: widget.darkMode ? Colors.white : Colors.black,
+              ),
               decoration: InputDecoration(
                 labelText: 'Päivämäärä & aika',
                 floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30)
+                    borderRadius: BorderRadius.circular(30),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -137,6 +149,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             // Prioriteetin valintavalikko (Dropdown)
             DropdownButtonFormField<String>(
               value: _selectedPriority,
+              dropdownColor: widget.darkMode ? Colors.black : Colors.white,
+              // Tekstikentän väri muuttuu riippuen moodista
+              style: TextStyle(
+                color: widget.darkMode ? Colors.white : Colors.black,
+              ),
               decoration: InputDecoration(
                 labelText: 'Prioriteetti',
                 floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
@@ -214,6 +231,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             TextField(
               controller: _controller,
               autofocus: true,
+              // Tekstikentän väri muuttuu riippuen moodista
+              style: TextStyle(
+                color: widget.darkMode ? Colors.white : Colors.black,
+              ),
               decoration: InputDecoration(
                 labelText: 'Tehtävä',
                 floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
@@ -230,9 +251,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
             // Tallenna-painike, joka palauttaa annetut tiedot takaisin edelliselle näytölle
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF4395F9),
-                foregroundColor: Colors.white,
+              style: ElevatedButton.styleFrom( // Värit muuttuvat riippuen moodista
+                backgroundColor: widget.darkMode ? Colors.orange[900] : Colors.orange[300],
+                foregroundColor: widget.darkMode ? Colors.white : Colors.black,
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: Text('Tallenna'),

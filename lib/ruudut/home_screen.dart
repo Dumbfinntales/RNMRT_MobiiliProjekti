@@ -14,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _tasks = []; // Lista tallennetuista tehtävistä
   String _selectedFilter = 'all'; // Suodatuksen oletusarvo
   String _searchQuery = ''; // Haku
+  bool _darkMode = false; // Seuraa teemaa, vaalea tai tumma
 
   // Jokainen tehtävä on Map, jossa on avaimet 'tehtava', 'paivamaara' ja 'priority'
   void _toggleTaskDone(int index) async {
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _navigateAndAddTask() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddTaskScreen()),
+      MaterialPageRoute(builder: (context) => AddTaskScreen(darkMode: _darkMode)),
     );
 
     // Jos tuloksena saatiin tehtävädataa
@@ -103,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
           alkuperainenTehtava: taskToEdit['tehtava'],
           alkuperainenPaivamaara: taskToEdit['paivamaara'],
           alkuperainenPrioriteetti: taskToEdit['priority'],
+          darkMode: _darkMode,
         ),
       ),
     );
@@ -185,6 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final filtered = _filteredTasks();
 
     return Scaffold(
+      // Taustan väri riippuen moodista
+      backgroundColor: _darkMode ? const Color.fromARGB(200, 0, 0, 0) : Colors.white,
       body: Column(
         children: [
           // Otsikko + Switch
@@ -195,17 +199,31 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'ToDo',
-                  style: TextStyle(fontSize: 64, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold,
+                  color: _darkMode ? Colors.white : Colors.black), // Väri muuttuu riippuen moodista
                 ),
 
-                // Switch teemalle, voi vaihtaa napiksikki
-                // Joku juttu lisätä mikä ilmentää mikä tämä on. Kuu ja aurinko?
-                Switch(
-                  value: false,
-                  onChanged: (bool newValue) { },
-                  activeColor: Colors.blue,           // Pallon väri, kun päällä
-                  inactiveThumbColor: Colors.blue,    // Pallon väri, kun pois päältä
-                ),
+              // Switch joka kontrolloi tummaa/vaaleaa teemaa
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Icon(
+                    _darkMode ? Icons.nightlight_round : Icons.wb_sunny, // Aurinko tai kuu ikoni
+                    color: _darkMode ? Colors.yellowAccent : Colors.orange, // Väri riippuu moodista
+                  ),
+                  SizedBox(width: 8),
+                  Switch(
+                    value: _darkMode,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        _darkMode = newValue;
+                      });
+                    },
+                    activeColor: Colors.orange[900],
+                    inactiveThumbColor: Colors.orange[300],
+                  ),
+                ],
+              )
               ],
             ),
           ),
@@ -264,13 +282,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                     items: [
-                      DropdownMenuItem(value: 'all', child: Text('Kaikki', style: TextStyle(fontSize: 20)),
+                      DropdownMenuItem(value: 'all', child: Text('Kaikki', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
                       ),
-                      DropdownMenuItem(value: 'high', child: Text('Kiireelliset', style: TextStyle(fontSize: 20)),
+                      DropdownMenuItem(value: 'high', child: Text('Kiireelliset', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
                       ),
-                      DropdownMenuItem(value: 'medium', child: Text('Tärkeät', style: TextStyle(fontSize: 20)),
+                      DropdownMenuItem(value: 'medium', child: Text('Tärkeät', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
                       ),
-                      DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset', style: TextStyle(fontSize: 20)),
+                      DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
                       ),
                     ],
                   ),
@@ -287,7 +305,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 final task = filtered[index];
                 return Card(
                   margin: EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                  color: task['done'] ? Color(0xFF73E19F) : Colors.white,
+                  // Taskin väri vaihtuu vihertäväksi riippuen onko sitä painettu
+                  // Korttien default taustaväri riippuu moodista
+                  color: task['done'] ? Color(0xFF73E19F) : (_darkMode ? Colors.grey[600] : Colors.white),
                   child: ListTile(
                     contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                     onTap: () => _toggleTaskDone(index),
@@ -343,15 +363,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       // Uuden tehtävän lisäys
-      floatingActionButton: SizedBox(
-        width: 72,
-        height: 72,
-        child: FloatingActionButton(
-          onPressed: _navigateAndAddTask,
-          backgroundColor: Color(0xFF4395F9),
-          shape: CircleBorder(),
-          child: Icon(Icons.add, size: 36, color: Colors.white),
-        ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _navigateAndAddTask,
+        icon: Icon(Icons.add, color: _darkMode ? Colors.white : Colors.black),
+        backgroundColor: _darkMode ? Colors.orange[900] : Colors.orange[300],
+        label: Text('Lisää tehtävä'
+            , style: TextStyle(color: _darkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
