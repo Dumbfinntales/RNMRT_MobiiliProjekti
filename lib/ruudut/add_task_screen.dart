@@ -40,8 +40,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       initialDate: _selectedDate!,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Color(0xFF4395F9), // Oletus violetti väri siniseksi
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
-    
+
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
@@ -54,10 +64,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime!,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-        child: child!,
-      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Color(0xFF4395F9),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -66,6 +82,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       });
     }
   }
+
 
   // Muotoilee päivämäärän dd-MM-yyyy -muotoon ja lisää kellonajan samaan merkkijonoon
   String formatDate() {
