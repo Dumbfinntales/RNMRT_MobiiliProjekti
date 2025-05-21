@@ -10,7 +10,9 @@ class ToDoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RNMRT ToDo App', // Sovelluksen nimi
-      theme: ThemeData(primarySwatch: Colors.teal), // Väri teemaan, näitä voi alkaa muokkaamaan tarkemmin myöhemmin
+      theme: ThemeData(
+        primarySwatch: Colors.teal, // Väri teemaan, näitä voi alkaa muokkaamaan tarkemmin myöhemmin
+        fontFamily: 'MyFont',),
       home: HomeScreen(), // Kotiruutu
     );
   }
