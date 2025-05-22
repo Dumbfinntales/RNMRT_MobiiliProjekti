@@ -112,6 +112,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 16.0),
+        child:SingleChildScrollView(
         child: Column(
           children: [
             // Päivämäärä + aika (vain luettava)
@@ -282,7 +283,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             ),
           ],
         ),
-      ),
+      ),)
+
     );
   }
 }

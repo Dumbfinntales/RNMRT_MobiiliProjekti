@@ -361,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          
+
           // Tehtävälista
           Expanded(
             child: ListView.builder(
@@ -427,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      
+
       // Uuden tehtävän lisäys
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateAndAddTask,
