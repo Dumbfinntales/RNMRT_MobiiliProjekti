@@ -12,14 +12,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _tasks = []; // Lista tallennetuista tehtävistä
-  String _selectedFilter = 'all'; // Suodatuksen oletusarvo
+  List<String> _selectedPriorities = ['high', 'medium', 'low']; // Valitut prioriteetit
+  String _statusFilter = 'all'; // Suodatuksen oletusarvo
   String _searchQuery = ''; // Haku
   bool _darkMode = false; // Seuraa teemaa, vaalea tai tumma
 
   // Jokainen tehtävä on Map, jossa on avaimet 'tehtava', 'paivamaara' ja 'priority'
   void _toggleTaskDone(int index) async {
+    final task = _filteredTasks()[index];
+    final originalIndex = _tasks.indexOf(task); // Etsitään alkuperäinen indeksi
+
     setState(() {
-      _filteredTasks()[index]['done'] = !_filteredTasks()[index]['done'];
+      _tasks[originalIndex]['done'] = !_tasks[originalIndex]['done'];
       _sortTasks();
     });
     await _saveTasks(); // Tallennetaan
@@ -28,9 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTasks(); // Ladataan tallennetut tehtävät sovelluksen käynnistyessä
+    _loadTasks();  // Ladataan tallennetut tehtävät sovelluksen käynnistyessä
   }
-
   // Avaa tehtävänlisäysnäytön ja lisää uuden tehtävän paluun jälkeen
   Future<void> _navigateAndAddTask() async {
     final result = await Navigator.push(
@@ -44,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _tasks.add(result); // Lisätään uusi tehtävä listaan
         _sortTasks();
       });
-      await _saveTasks(); // Tallennetaan päivitetty tehtävälista
+      await _saveTasks();  // Tallennetaan päivitetty tehtävälista
     }
   }
 
@@ -52,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _saveTasks() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
       // Muutetaan jokainen tehtävä JSON-merkkijonoksi
       final List<String> taskJsonList = _tasks.map((task) {
         final taskCopy = Map<String, dynamic>.from(task);
@@ -121,9 +123,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Poistaa tehtävän listalta
   void _deleteTask(int index) {
+    final taskToRemove = _filteredTasks()[index];
+    final originalIndex = _tasks.indexOf(taskToRemove); // Etsitään alkuperäinen indeksi
+
     setState(() {
-      final taskToRemove = _filteredTasks()[index];
-      _tasks.remove(taskToRemove);
+      _tasks.removeAt(originalIndex);
     });
     _saveTasks();
   }
@@ -141,12 +145,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return Colors.grey;
     }
   }
-
   // Muotoilee päivämäärän dd-MM-yyyy ja kellonajan HH:mm -muotoon
   String _formatDate(DateTime date) {
-      final datePart = DateFormat('dd.MM.yy').format(date); // Päivämäärä
-      final timePart = DateFormat('HH:mm').format(date); // Aika 24h muodossa
-      return '$datePart \nKlo $timePart'; // Lisää "klo"
+    final datePart = DateFormat('dd.MM.yy').format(date); // Päivämäärä
+    final timePart = DateFormat('HH:mm').format(date); // Aika 24h muodossa
+    return '$datePart \nKlo $timePart'; // Lisää "klo"
   }
 
   // HAKU & SUODATUS
@@ -154,25 +157,26 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _filteredTasks() {
     return _tasks.where((task) {
       // Tarkistaa täsmääkö tehtävän prioriteetti suodattimeen, tai jos suodatin on 'all'
-      final matchesFilter =
-          _selectedFilter == 'all' || task['priority'] == _selectedFilter;
+      final matchesPriority = _selectedPriorities.contains(task['priority']);
+      final matchesDone =
+          _statusFilter == 'all' ||
+          (_statusFilter == 'done' && task['done'] == true) ||
+          (_statusFilter == 'not_done' && task['done'] != true);
 
       // Muutetaan pieniksi kirjaimiksi
       final tehtavaTeksti =
-      task['tehtava'].toLowerCase(); // Haetaan tehtävän teksti
-      // Muodostetaan numero tekstimuotoon
+          task['tehtava'].toLowerCase();
+           // Muodostetaan numero tekstimuotoon
       final paivamaaraTeksti =
-      _formatDate(task['paivamaara']).toLowerCase();
+          _formatDate(task['paivamaara']).toLowerCase();
 
       // Tarkistetaan täsmääkö hakusana joko tehtävän tekstissä tai päivämäärässä
       final matchesSearch = tehtavaTeksti.contains(_searchQuery.toLowerCase()) ||
           paivamaaraTeksti.contains(_searchQuery.toLowerCase());
-
-      // Palautetaan true vain jos molemmat ehdot täyttyvät: prioriteettisuodatin ja hakusana
-      return matchesFilter && matchesSearch;
+       // Palautetaan true vain jos molemmat ehdot täyttyvät: prioriteettisuodatin ja hakusana
+      return matchesPriority && matchesDone && matchesSearch;
     }).toList(); // Muutetaan tulos listaksi ja palautetaan
   }
-
 
   // Järjestää tehtävät niin että tekemättömät ovat ensin
   void _sortTasks() {
@@ -182,12 +186,88 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Näyttää suodatusikkunan, jossa käyttäjä voi valita:
+  // - Prioriteetit (kiireelliset, tärkeät, ei kiireelliset)
+  // - Tilan (kaikki, tehdyt, tekemättömät)
+  // Valinnat vaikuttavat tehtävälistan näkymään
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text("Suodattimet"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("Prioriteetti:"),
+                    ...['high', 'medium', 'low'].map((priority) {
+                      return CheckboxListTile(
+                        title: Text(
+                          priority == 'high'
+                              ? 'Kiireelliset'
+                              : priority == 'medium'
+                                  ? 'Tärkeät'
+                                  : 'Ei kiireelliset',
+                        ),
+                        value: _selectedPriorities.contains(priority),
+                        onChanged: (value) {
+                          setStateDialog(() {
+                            if (value == true) {
+                              _selectedPriorities.add(priority);
+                            } else {
+                              _selectedPriorities.remove(priority);
+                            }
+                          });
+                          setState(() {});
+                        },
+                      );
+                    }).toList(),
+                    Divider(),
+                    Text("Tila:"),
+                    ...['all', 'done', 'not_done'].map((status) {
+                      return RadioListTile<String>(
+                        title: Text(
+                          status == 'all'
+                              ? 'Kaikki tehtävät'
+                              : status == 'done'
+                                  ? 'Tehdyt'
+                                  : 'Tekemättömät',
+                        ),
+                        value: status,
+                        groupValue: _statusFilter,
+                        onChanged: (value) {
+                          setStateDialog(() {
+                            _statusFilter = value!;
+                          });
+                          setState(() {});
+                        },
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Sulje"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredTasks();
 
     return Scaffold(
-      // Taustan väri riippuen moodista
+       // Taustan väri riippuen moodista
       backgroundColor: _darkMode ? const Color.fromARGB(200, 0, 0, 0) : Colors.white,
       body: Column(
         children: [
@@ -202,28 +282,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold,
                   color: _darkMode ? Colors.white : Colors.black), // Väri muuttuu riippuen moodista
                 ),
-
-              // Switch joka kontrolloi tummaa/vaaleaa teemaa
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Icon(
-                    _darkMode ? Icons.nightlight_round : Icons.wb_sunny, // Aurinko tai kuu ikoni
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Icon(
+                      _darkMode ? Icons.nightlight_round : Icons.wb_sunny, // Aurinko tai kuu ikoni
                     color: _darkMode ? Colors.yellowAccent : Colors.orange, // Väri riippuu moodista
-                  ),
-                  SizedBox(width: 8),
-                  Switch(
-                    value: _darkMode,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        _darkMode = newValue;
-                      });
-                    },
-                    activeColor: Colors.orange[900],
-                    inactiveThumbColor: Colors.orange[300],
-                  ),
-                ],
-              )
+                    ),
+                    SizedBox(width: 8),
+                    Switch(
+                      value: _darkMode,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          _darkMode = newValue;
+                        });
+                      },
+                      activeColor: Colors.orange[900],
+                      inactiveThumbColor: Colors.orange[300],
+                    ),
+                  ],
+                )
               ],
             ),
           ),
@@ -270,33 +348,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 SizedBox(height: 8),
-
-                // Suodatin
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: DropdownButton<String>(
-                    value: _selectedFilter,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedFilter = newValue!;
-                      });
-                    },
-                    items: [
-                      DropdownMenuItem(value: 'all', child: Text('Kaikki', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
-                      ),
-                      DropdownMenuItem(value: 'high', child: Text('Kiireelliset', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
-                      ),
-                      DropdownMenuItem(value: 'medium', child: Text('Tärkeät', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
-                      ),
-                      DropdownMenuItem(value: 'low', child: Text('Ei kiireelliset', style: TextStyle(fontSize: 20, color: Colors.grey[600])),
-                      ),
-                    ],
-                  ),
-                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _showFilterDialog(),
+                      icon: Icon(Icons.filter_list),
+                      label: Text("Suodattimet"),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
-
+          
           // Tehtävälista
           Expanded(
             child: ListView.builder(
@@ -305,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final task = filtered[index];
                 return Card(
                   margin: EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                  // Taskin väri vaihtuu vihertäväksi riippuen onko sitä painettu
+                   // Taskin väri vaihtuu vihertäväksi riippuen onko sitä painettu
                   // Korttien default taustaväri riippuu moodista
                   color: task['done'] ? Color(0xFF73E19F) : (_darkMode ? Colors.grey[600] : Colors.white),
                   child: ListTile(
@@ -333,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle: Text(
                       _formatDate(task['paivamaara']),
                       style: TextStyle(
-                          fontSize: 18,
+                        fontSize: 18,
                         decoration: task['done']
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,
@@ -362,13 +427,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
+      
       // Uuden tehtävän lisäys
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateAndAddTask,
         icon: Icon(Icons.add, color: _darkMode ? Colors.white : Colors.black),
         backgroundColor: _darkMode ? Colors.orange[900] : Colors.orange[300],
-        label: Text('Lisää tehtävä'
-            , style: TextStyle(color: _darkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+        label: Text('Lisää tehtävä',
+            style: TextStyle(color: _darkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
