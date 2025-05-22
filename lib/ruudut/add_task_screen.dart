@@ -46,7 +46,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Color(0xFF4395F9), // Oletus violetti väri siniseksi
+              primary: Color(0xFF444444), // Väri
             ),
           ),
           child: child!,
@@ -70,7 +70,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Color(0xFF4395F9),
+              primary: Color(0xFF444444),
             ),
           ),
           child: child!,
@@ -97,11 +97,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Taustaväri muuttuu riippuen moodista
-      backgroundColor: widget.darkMode ? Color.fromARGB(200, 0, 0, 0) : Colors.white,
+      backgroundColor: widget.darkMode ? Color.fromARGB(200, 0, 0, 0) : Color(0xFFF5F5F5),
       appBar: AppBar(
         toolbarHeight: 100,
-        backgroundColor: widget.darkMode ? Color.fromARGB(20, 0, 0, 0) : Colors.white,
-        title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää', 
+        backgroundColor: widget.darkMode ? Color.fromARGB(20, 0, 0, 0) : Color(0xFFF5F5F5),
+        iconTheme: IconThemeData(
+          color: widget.darkMode ? Colors.white : Colors.black, // Takaisin-nuolen väri
+        ),
+        title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää',
           style: TextStyle( // Muuttaa otiskon värin riippuen moodista
             color: widget.darkMode ? Colors.white : Colors.black
           ),
@@ -121,23 +124,23 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               ),
               decoration: InputDecoration(
                 labelText: 'Päivämäärä & aika',
-                floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
+                floatingLabelStyle: TextStyle(color: widget.darkMode ? Colors.white : Colors.black),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Color(0xFF4395F9), width: 2),
+                  borderSide: BorderSide(color: Colors.black, width: 2),
                 ),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.calendar_today),
+                      icon: Icon(Icons.calendar_today, color: widget.darkMode ? Colors.white70 : Colors.black54,),
                       onPressed: () => _selectDate(context),
                     ),
                     IconButton(
-                      icon: Icon(Icons.access_time),
+                      icon: Icon(Icons.access_time, color: widget.darkMode ? Colors.white70 : Colors.black54,),
                       onPressed: () => _selectTime(context),
                     ),
                   ],
@@ -156,13 +159,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               ),
               decoration: InputDecoration(
                 labelText: 'Prioriteetti',
-                floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
+                floatingLabelStyle: TextStyle(color: widget.darkMode ? Colors.white : Colors.black),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30)
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Color(0xFF4395F9), width: 2),
+                  borderSide: BorderSide(color: Colors.black, width: 2),
                 ),
               ),
               items: [
@@ -237,13 +240,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               ),
               decoration: InputDecoration(
                 labelText: 'Tehtävä',
-                floatingLabelStyle: TextStyle(color: Color(0xFF4395F9)),
+                floatingLabelStyle: TextStyle(color: widget.darkMode ? Colors.white : Colors.black),
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30)
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Color(0xFF4395F9), width: 2),
+                  borderSide: BorderSide(color: widget.darkMode ? Colors.white : Colors.black, width: 2),
                 ),
               ),
             ),
@@ -256,7 +259,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 foregroundColor: widget.darkMode ? Colors.white : Colors.black,
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: Text('Tallenna'),
+              child: Text(
+                'Tallenna',
+                style: TextStyle(fontSize: 16),
+              ),
               onPressed: () {
                 final fullDateTime = DateTime(
                   _selectedDate!.year,

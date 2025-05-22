@@ -205,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Prioriteetti:"),
                     ...['high', 'medium', 'low'].map((priority) {
                       return CheckboxListTile(
+                        activeColor: Color(0xFF444444),
                         title: Text(
                           priority == 'high'
                               ? 'Kiireelliset'
@@ -229,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Tila:"),
                     ...['all', 'done', 'not_done'].map((status) {
                       return RadioListTile<String>(
+                        activeColor: Color(0xFF444444),
                         title: Text(
                           status == 'all'
                               ? 'Kaikki tehtävät'
@@ -268,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
        // Taustan väri riippuen moodista
-      backgroundColor: _darkMode ? const Color.fromARGB(200, 0, 0, 0) : Colors.white,
+      backgroundColor: _darkMode ? const Color.fromARGB(200, 0, 0, 0) : Color(0xFFF5F5F5),
       body: Column(
         children: [
           // Otsikko + Switch
@@ -308,39 +310,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Hakukenttä + Suodatusvalikko
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
             child: Column(
               children: [
                 TextField(
-                  style: const TextStyle(fontSize: 24),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: _darkMode ? Colors.white : Colors.black, // <-- Muuttuu teeman mukaan
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Hae',
-                    hintStyle: TextStyle(fontSize: 24, color: Colors.grey[600]),
-                    prefixIcon: Icon(Icons.search, size: 30,), // Suurennuslasi
+                    hintStyle: TextStyle(
+                      fontSize: 18,
+                      color: _darkMode ? Colors.white : Colors.black,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 24,
+                      color: _darkMode ? Colors.white70 : Colors.black54,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(
-                        color: Colors.grey[300]!,
-                        width: 1.0,
-                      ),
                     ),
-                    // Kun kenttä ei ole aktiivinen
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(
-                        color: Colors.grey[300]!,
-                        width: 1.2,
-                      ),
-                    ),
-                    // Kun kenttä on aktiivinen
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide(
-                        color: Colors.grey[500]!,
-                        width: 1.4,
+                        color: _darkMode ? Colors.white : Colors.black,
+                        width: 1.5,
                       ),
                     ),
                   ),
+                  cursorColor: _darkMode ? Colors.white : Colors.black,
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value;
@@ -374,11 +374,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Korttien default taustaväri riippuu moodista
                   color: task['done'] ? Color(0xFF73E19F) : (_darkMode ? Colors.grey[600] : Colors.white),
                   child: ListTile(
-                    contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                    contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 8),
                     onTap: () => _toggleTaskDone(index),
                     leading: Container(
-                      width: 34,
-                      height: 34,
+                      width: 24,
+                      height: 24,
                       decoration: BoxDecoration(
                         color: _getPriorityColor(task['priority']),
                         shape: BoxShape.circle,
@@ -387,7 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: Text(
                       task['tehtava'],
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         decoration: task['done']
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,
@@ -398,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle: Text(
                       _formatDate(task['paivamaara']),
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         decoration: task['done']
                             ? TextDecoration.lineThrough
                             : TextDecoration.none,
@@ -410,11 +410,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.edit, size: 30),
+                          icon: Icon(Icons.edit, size: 24),
                           onPressed: () => _editTask(index),
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete, size: 30),
+                          icon: Icon(Icons.delete, size: 24),
                           onPressed: () => _deleteTask(index),
                         ),
                       ],
@@ -434,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icon(Icons.add, color: _darkMode ? Colors.white : Colors.black),
         backgroundColor: _darkMode ? Colors.orange[900] : Colors.orange[300],
         label: Text('Lisää tehtävä',
-            style: TextStyle(color: _darkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+            style: TextStyle(color: _darkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
