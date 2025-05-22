@@ -8,19 +8,19 @@ Tallennus tapahtuu paikallisesti laitteen muistissa käyttäen `SharedPreference
 
 ## 🔧 Ominaisuudet
 
- ✅ Tehtävien lisääminen, muokkaaminen, poistaminen ja kuittaaminen tehdyksi
- 🎯 Tehtävien priorisointi: **Kiireelliset**, **Tärkeät**, **Ei kiireelliset**
- 📅 Päivämäärän ja kellonajan näyttö ja muotoilu
- 🌓 Tumma ja vaalea teema
- 🔍 Hakutoiminto tehtävän nimellä tai päivämäärällä
- 🧮 Suodatus tehtävien tilan ja prioriteetin mukaan
- 💾 Paikallinen tallennus SharedPreferencesilla
+ - ✅ Tehtävien lisääminen, muokkaaminen, poistaminen ja kuittaaminen tehdyksi
+ - 🎯 Tehtävien priorisointi: **Kiireelliset**, **Tärkeät**, **Ei kiireelliset**
+ - 📅 Päivämäärän ja kellonajan näyttö ja muotoilu
+ - 🌓 Tumma ja vaalea teema
+ - 🔍 Hakutoiminto tehtävän nimellä tai päivämäärällä
+ - 🧮 Suodatus tehtävien tilan ja prioriteetin mukaan
+ - 💾 Paikallinen tallennus SharedPreferencesilla
 
  ## 🖼️ Käyttöliittymä
 
-**Etusivu:** Näyttää tehtävälistan, hakukentän, suodattimet ja tumman/vaalean teeman valinnan.
-**Tehtävän lisäys-/muokkausnäyttö:** Navigoidaan erilliseen näkymään uuden tehtävän luomista tai olemassa olevan muokkaamista varten.
-**Tehtävälista:** Lista näyttää tehtäväkortin jossa tehtävän nimi, päivämäärä, prioriteetti värillä sekä muokkaus- ja poistopainikkeet.
+- **Etusivu:** Näyttää tehtävälistan, hakukentän, suodattimet ja tumman/vaalean teeman valinnan.
+- **Tehtävän lisäys-/muokkausnäyttö:** Navigoidaan erilliseen näkymään uuden tehtävän luomista tai olemassa olevan muokkaamista varten.
+- **Tehtävälista:** Lista näyttää tehtäväkortin jossa tehtävän nimi, päivämäärä, prioriteetti värillä sekä muokkaus- ja poistopainikkeet.
                   Tehtävät listautuvat automaattisesti tekemättömät ensin ja päivämäärän mukaan nousevassa järjestyksessä.
 
 ## 🧠 Tiedonhallinta
@@ -28,10 +28,18 @@ Tallennus tapahtuu paikallisesti laitteen muistissa käyttäen `SharedPreference
 Kaikki tehtävät tallennetaan `SharedPreferences`-muotoon listana JSON-merkkijonoja.
 Tallennettuja tehtäviä luetaan sovelluksen käynnistyessä ja päivitetään aina muutoksen jälkeen.
 
+## ⚙️ Asennus
+
+1. Klonaa projekti
+2. Lataa riippuvuudet:
+   flutter pub get
+3. Käynnistä sovellus:
+   flutter run
+
 ## 🧭 Käyttöohje
 
 1. Käynnistä sovellus
-    Avaa sovellus laitteella tai emulaattorilla.
+    - Avaa sovellus laitteella tai emulaattorilla.
 
 2. Lisää uusi tehtävä
     - Paina alareunan ➕ Lisää tehtävä-painiketta.
@@ -61,13 +69,7 @@ Tallennettuja tehtäviä luetaan sovelluksen käynnistyessä ja päivitetään a
 8. Vaihda teemaa (tumma / vaalea)
     - Paina oikean yläkulman auringon / kuun kuvaketta.
 
-## ⚙️ Asennus
 
-1. Klonaa projekti
-2. Lataa riippuvuudet
-   flutter pub get
-3. Käynnistä sovellus
-   flutter run
 
 
 
