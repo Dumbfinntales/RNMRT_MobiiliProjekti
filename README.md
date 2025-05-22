@@ -31,10 +31,8 @@ Tallennettuja tehtäviä luetaan sovelluksen käynnistyessä ja päivitetään a
 ## ⚙️ Asennus
 
 1. Klonaa projekti
-2. Lataa riippuvuudet:
-   flutter pub get
-3. Käynnistä sovellus:
-   flutter run
+2. Lataa riippuvuudet `flutter pub get`
+3. Käynnistä sovellus `flutter run`
 
 ## 🧭 Käyttöohje
 
