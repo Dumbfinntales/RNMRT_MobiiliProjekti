@@ -1,6 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+// Tässä oli yritys tehdä sellainen popup-ilmoitus kun tehtävä on vanhentumassa
+// Mutta se ei oikein onnistunut, niin tässän on koodin jämät yrityksestä
 class NotificationHelper {
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();

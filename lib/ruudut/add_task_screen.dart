@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // Flutterin widgetit
 import 'package:intl/intl.dart'; // Kirjasto päivämäärän muotoiluun
 
 // Näytön luokka uuden tehtävän lisäämiseen tai olemassa olevan muokkaamiseen
@@ -8,7 +8,7 @@ class AddTaskScreen extends StatefulWidget {
   final String? alkuperainenPrioriteetti;  // Mahdollinen aiempi prioriteetti muokkauksessa
   final bool darkMode; // Seuraa darkModen muutosta homeScreenistä
 
-  AddTaskScreen({
+  AddTaskScreen({ // Muuttujat alkuperäiselle tehtävälle, päivämäärälle ja prioriteetille
     this.alkuperainenTehtava,
     this.alkuperainenPaivamaara,
     this.alkuperainenPrioriteetti,
@@ -105,7 +105,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           color: widget.darkMode ? Colors.white : Colors.black, // Takaisin-nuolen väri
         ),
         title: Text(widget.alkuperainenTehtava == null ? 'Lisää tehtävä' : 'Muokkaa tehtävää',
-          style: TextStyle( // Muuttaa otiskon värin riippuen moodista
+          style: TextStyle( // Muuttaa otsikon värin riippuen moodista
             color: widget.darkMode ? Colors.white : Colors.black
           ),
         ),

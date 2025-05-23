@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // Flutterin widgetit
 import 'add_task_screen.dart'; // Tuodaan tehtävänlisäys-/muokkausnäyttö
 import 'package:shared_preferences/shared_preferences.dart'; // Tallennusta varten
 import 'dart:convert'; // JSON data muotoilua varten
@@ -316,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextField(
                   style: TextStyle(
                     fontSize: 18,
-                    color: _darkMode ? Colors.white : Colors.black, // <-- Muuttuu teeman mukaan
+                    color: _darkMode ? Colors.white : Colors.black, // Muuttuu moodin mukaan
                   ),
                   decoration: InputDecoration(
                     hintText: 'Hae',
@@ -355,6 +355,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () => _showFilterDialog(),
                       icon: Icon(Icons.filter_list),
                       label: Text("Suodattimet"),
+                      style: ElevatedButton.styleFrom(
+                        iconColor: _darkMode ? Colors.white : Colors.black, // Ikonin väri riippuu moodista
+                        backgroundColor: _darkMode ? Colors.orange[900] : Colors.orange[300], // Napin väri riippuu moodista
+                        foregroundColor: _darkMode ? Colors.white : Colors.black, // Tekstin väri riippuu moodista
+                        textStyle: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      
                     ),
                   ],
                 )
@@ -370,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final task = filtered[index];
                 return Card(
                   margin: EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                   // Taskin väri vaihtuu vihertäväksi riippuen onko sitä painettu
+                  // Taskin väri vaihtuu vihertäväksi riippuen onko sitä painettu
                   // Korttien default taustaväri riippuu moodista
                   color: task['done'] ? Color(0xFF73E19F) : (_darkMode ? Colors.grey[600] : Colors.white),
                   child: ListTile(
@@ -431,8 +441,8 @@ class _HomeScreenState extends State<HomeScreen> {
       // Uuden tehtävän lisäys
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _navigateAndAddTask,
-        icon: Icon(Icons.add, color: _darkMode ? Colors.white : Colors.black),
-        backgroundColor: _darkMode ? Colors.orange[900] : Colors.orange[300],
+        icon: Icon(Icons.add, color: _darkMode ? Colors.white : Colors.black), // Ikoni moodin mukaan
+        backgroundColor: _darkMode ? Colors.orange[900] : Colors.orange[300], // Väri riippuu moodista
         label: Text('Lisää tehtävä',
             style: TextStyle(color: _darkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
       ),
